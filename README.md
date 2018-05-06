@@ -1,6 +1,6 @@
 # Markdown Bullet Journal
 
-![Markdown Bullet Journal Logo](https://github.com/dballard/markdown-bullet-journal/raw/master/src/Markdown-Bullet-Journal.png "Markdown Bullet Journal Logo")
+![Markdown Bullet Journal Logo](https://github.com/dballard/markdown-bullet-journal/raw/master/Markdown-Bullet-Journal.png "Markdown Bullet Journal Logo")
 
 Markdown Bullet Journal is a digital adaptation of analog tech. I found having a running todo list with daily migrations dropping done items worked best for my workflow. Add a simple summary app to show you all you have accomplished and I'm happy.
 
