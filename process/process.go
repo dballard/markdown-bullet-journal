@@ -4,14 +4,15 @@ import (
 	"os"
 	"log"
 	"bufio"
-	"strings"
 	"regexp"
 	"io/ioutil"
-	"strconv"
 )
 
 type ProcessHandler interface  {
 	Writeln(line string)
+	ProcessLine(line string, stack []string, todo bool, done bool)
+	Eof()
+	NewFile()
 }
 
 func GetFiles() (filteredFiles []string) {
@@ -38,58 +39,40 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 		log.Fatal(err)
 	}
 	defer file.Close()
+	ph.NewFile()
 
-	header := ""
-	headerPrinted := false
 	stack := make([]string, 0)
-
-	total := 0
-	doneCount := 0
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		if scanner.Text() == "# Daily Health" {
-			break
-		}
-		if strings.Trim(scanner.Text(), " \t\n\r") == "" {
+		line := scanner.Text()
+
+		/*if strings.Trim(line, " \t\n\r") == "" {
 			continue
 		}
 		if scanner.Text()[0] == '#' {
-			header = scanner.Text()[2:]
-			headerPrinted = false;
 			continue
-		}
+		}*/
 
 		startSpaces := regexp.MustCompile("^ *")
-		indentLevel := len(startSpaces.Find([]byte(scanner.Text())))/4
+		indentLevel := len(startSpaces.Find([]byte(line)))/4
 		todo := false
 		done := false
 		if indentLevel < len(stack)-1 {
 			stack = stack[: indentLevel+1]
 		}
 		if indentLevel == len(stack)-1 {
-			stack[len(stack)-1], todo, done = getText(scanner.Text(), indentLevel)
+			stack[len(stack)-1], todo, done = getText(line, indentLevel)
 		}
 		if indentLevel >= len(stack) {
-			line := ""
-			line, todo, done = getText(scanner.Text(), indentLevel)
-			stack = append(stack, line)
+			row := ""
+			row, todo, done = getText(line, indentLevel)
+			stack = append(stack, row)
 		}
 
-		if todo {
-			total += 1
-		}
-
-		if done {
-			if !headerPrinted {
-				ph.Writeln(" # " + header)
-				headerPrinted = true
-			}
-			doneCount += 1
-			ph.Writeln("  " + strings.Join(stack, " / "))
-		}
+		ph.ProcessLine(line, stack, todo, done)
 	}
-	ph.Writeln(strconv.Itoa(doneCount) +  " / " + strconv.Itoa(total))
+	ph.Eof()
 }
 
 func getText(str string, indentLevel int) (text string, todo bool, done bool) {
