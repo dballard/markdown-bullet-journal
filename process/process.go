@@ -16,7 +16,7 @@ type RepTask struct {
 
 type ProcessHandler interface  {
 	Writeln(line string)
-	ProcessLine(line string, stack []string, todo bool, done bool, repTask RepTask)
+	ProcessLine(line string, indentLevel int, stack []string, todo bool, done bool, repTask RepTask)
 	Eof()
 	NewFile()
 }
@@ -77,7 +77,7 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 			stack = append(stack, row)
 		}
 
-		ph.ProcessLine(line, stack, todo, done, repTask)
+		ph.ProcessLine(line, indentLevel, stack, todo, done, repTask)
 	}
 	ph.Eof()
 }

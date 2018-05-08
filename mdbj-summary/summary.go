@@ -32,7 +32,7 @@ func (ph *processHandler) Eof() {
 	ph.Writeln(strconv.Itoa(ph.doneCount) +  " / " + strconv.Itoa(ph.totalCount))
 }
 
-func (ph *processHandler) ProcessLine(line string, stack []string, todo bool, done bool, repTask process.RepTask) {
+func (ph *processHandler) ProcessLine(line string, indentLevel int, stack []string, todo bool, done bool, repTask process.RepTask) {
 	if strings.Trim(line, " \t\n\r") == "" {
 		return
 	}

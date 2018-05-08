@@ -6,6 +6,8 @@ import (
 	"log"
 	"github.com/dballard/markdown-bullet-journal/process"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 const template = `# Work
@@ -38,10 +40,14 @@ func (ph *processHandler) Writeln(line string) {
 func (ph *processHandler) Eof() {}
 func (ph *processHandler) NewFile() {}
 
-func (ph *processHandler) ProcessLine(line string, stack []string, todo bool, done bool) {
+func (ph *processHandler) ProcessLine(line string, indentLevel int, stack []string, todo bool, done bool, repTask process.RepTask) {
 	// TODO: handle [x] numXnum
-	if !done {
-		ph.Writeln(line)
+	if !done || repTask.Is {
+		if repTask.Is {
+			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(repTask.B) + stack[len(stack)-1] )
+		} else {
+			ph.Writeln(line)
+		}
 	}
 }
 
