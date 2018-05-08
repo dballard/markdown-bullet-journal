@@ -6,11 +6,17 @@ import (
 	"bufio"
 	"regexp"
 	"io/ioutil"
+	"strconv"
 )
+
+type RepTask struct {
+	Is bool
+	A, B int
+}
 
 type ProcessHandler interface  {
 	Writeln(line string)
-	ProcessLine(line string, stack []string, todo bool, done bool)
+	ProcessLine(line string, stack []string, todo bool, done bool, repTask RepTask)
 	Eof()
 	NewFile()
 }
@@ -58,31 +64,33 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 		indentLevel := len(startSpaces.Find([]byte(line)))/4
 		todo := false
 		done := false
+		var repTask RepTask
 		if indentLevel < len(stack)-1 {
 			stack = stack[: indentLevel+1]
 		}
 		if indentLevel == len(stack)-1 {
-			stack[len(stack)-1], todo, done = getText(line, indentLevel)
+			stack[len(stack)-1], todo, done, repTask = getText(line, indentLevel)
 		}
 		if indentLevel >= len(stack) {
 			row := ""
-			row, todo, done = getText(line, indentLevel)
+			row, todo, done, repTask = getText(line, indentLevel)
 			stack = append(stack, row)
 		}
 
-		ph.ProcessLine(line, stack, todo, done)
+		ph.ProcessLine(line, stack, todo, done, repTask)
 	}
 	ph.Eof()
 }
 
-func getText(str string, indentLevel int) (text string, todo bool, done bool) {
+func getText(str string, indentLevel int) (text string, todo bool, done bool, repTask RepTask) {
 	//fmt.Printf("indentLevel: %v str: '%s'\n", indentLevel, str )
 	if len(str) < (indentLevel*4 +2) {
-		return "", false, false
+		return "", false, false, RepTask{false, 0, 0}
 	}
 	text = str[indentLevel*4 +2:]
 	done = false
 	todo = false
+	repTask.Is = false
 	if text[0] == '[' {
 		todo = true
 		if text[1] == 'x' || text[1] == 'X' {
@@ -90,6 +98,16 @@ func getText(str string, indentLevel int) (text string, todo bool, done bool) {
 		}
 		if len(text) > 4 {
 			text = text[4:]
+		}
+
+		repTaskRegExp := regexp.MustCompile("^([0-9]*)[xX]([0-9]*)")
+		if repTaskRegExp.MatchString(text) {
+			repTask.Is = true
+			matches := repTaskRegExp.FindStringSubmatch(text)
+			repTask.A, _ = strconv.Atoi(matches[1])
+			repTask.B, _ = strconv.Atoi(matches[2])
+			loc := repTaskRegExp.FindIndex([]byte(text))
+			text = text[loc[1]:]
 		}
 	}
 	return

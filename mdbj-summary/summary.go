@@ -32,7 +32,7 @@ func (ph *processHandler) Eof() {
 	ph.Writeln(strconv.Itoa(ph.doneCount) +  " / " + strconv.Itoa(ph.totalCount))
 }
 
-func (ph *processHandler) ProcessLine(line string, stack []string, todo bool, done bool) {
+func (ph *processHandler) ProcessLine(line string, stack []string, todo bool, done bool, repTask process.RepTask) {
 	if strings.Trim(line, " \t\n\r") == "" {
 		return
 	}
@@ -48,12 +48,16 @@ func (ph *processHandler) ProcessLine(line string, stack []string, todo bool, do
 
 	if done {
 		if !ph.headerPrinted {
-			ph.Writeln(" # " + ph.header)
+			ph.Writeln("\t# " + ph.header)
 			ph.headerPrinted = true
 		}
 		ph.doneCount += 1
 		// TODO: Math for [x] numXnum
-		ph.Writeln("  " + strings.Join(stack, " / "))
+		repStr := ""
+		if repTask.Is {
+			repStr = strconv.Itoa( repTask.A * repTask.B)
+		}
+		ph.Writeln("\t\t" + repStr + strings.Join(stack, " / "))
 	}
 }
 
@@ -77,4 +81,6 @@ func main() {
 		ph.Writeln(file)
 		process.ProcessFile(ph, file)
 	}
+
+	// If windows open summary.md
 }
