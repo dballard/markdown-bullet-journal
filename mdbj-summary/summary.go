@@ -42,7 +42,8 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, stack []stri
 		return
 	}
 
-	if todo {
+	// inc count of todo items (rep tasks shouldnt count towards outstanding todo, unless done)
+	if todo && !repTask.Is {
 		ph.totalCount += 1
 	}
 
@@ -52,10 +53,11 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, stack []stri
 			ph.headerPrinted = true
 		}
 		ph.doneCount += 1
-		// TODO: Math for [x] numXnum
 		repStr := ""
 		if repTask.Is {
 			repStr = strconv.Itoa( repTask.A * repTask.B)
+			// inc todo count here since we did a thing, its done, and we dont want a higher done count than total
+			ph.totalCount += 1
 		}
 		ph.Writeln("\t\t" + repStr + strings.Join(stack, " / "))
 	}

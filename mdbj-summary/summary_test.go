@@ -18,7 +18,7 @@ const EXPECTED = `
 		not nested
 	# Repetition
 		25 things
-4 / 12
+4 / 11
 `
 
 func TestSummary(t *testing.T) {
@@ -55,6 +55,5 @@ func TestSummary(t *testing.T) {
 		errorStr := string(result[int(math.Max(0, float64(diffLoc - 10))) : int(math.Min(float64(len(result)), float64(diffLoc + 10))) ])
 
 		t.Errorf("Summary results do not match expected:\nfirst difference at line %v: '%v'\n%v<---->\n%v\n", line, errorStr, string(result), EXPECTED)
-
 	}
 }
