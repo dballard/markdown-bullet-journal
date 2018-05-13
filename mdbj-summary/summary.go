@@ -68,7 +68,7 @@ func main() {
 
 	if runtime.GOOS == "windows" {
 		var err error
-		ph.File, err = os.Open("summary.md")
+		ph.File, err = os.Create("summary.md")
 		if err != nil {
 			log.Fatal("Cannot open summary.md: ", err)
 		}
