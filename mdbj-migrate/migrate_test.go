@@ -24,6 +24,8 @@ const EXPECTED = `# Work
             - [ ] nesting 4
     -
     asdasd
+- tabbing
+	- [ ] tabs migrated
 
 # Nothing done
 

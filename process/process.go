@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"io/ioutil"
 	"strconv"
+	"strings"
 )
 
 type RepTask struct {
@@ -50,18 +51,26 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 	stack := make([]string, 0)
 
 	scanner := bufio.NewScanner(file)
+	indentPattern := ""
+	startSpaces := regexp.MustCompile("^[\t ]*")
+	indentLevel := 0
 	for scanner.Scan() {
 		line := scanner.Text()
-
-		/*if strings.Trim(line, " \t\n\r") == "" {
-			continue
+		// if current line has no spaces at front, reset indent pattern
+		if len(line) == 0 || (line[0] != ' ' && line[0] != '\t') {
+			indentPattern = ""
 		}
-		if scanner.Text()[0] == '#' {
-			continue
-		}*/
+		// if no indent pattern and opening of line is space, set indent pattern
+		if indentPattern == "" && len(line) > 0 && (line[0] != ' ' || line[0] != '\t') {
+			indentPattern = startSpaces.FindString(line)
+		}
 
-		startSpaces := regexp.MustCompile("^ *")
-		indentLevel := len(startSpaces.Find([]byte(line)))/4
+		// number of times indent pattern repeats at front of line
+		if indentPattern == "" {
+			indentLevel = 0
+		} else {
+			indentLevel = strings.Count(startSpaces.FindString(line), indentPattern)
+		}
 		todo := false
 		done := false
 		var repTask RepTask
@@ -69,11 +78,11 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 			stack = stack[: indentLevel+1]
 		}
 		if indentLevel == len(stack)-1 {
-			stack[len(stack)-1], todo, done, repTask = getText(line, indentLevel)
+			stack[len(stack)-1], todo, done, repTask = getText(line, indentLevel, indentPattern)
 		}
 		if indentLevel >= len(stack) {
 			row := ""
-			row, todo, done, repTask = getText(line, indentLevel)
+			row, todo, done, repTask = getText(line, indentLevel, indentPattern)
 			stack = append(stack, row)
 		}
 
@@ -82,12 +91,13 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 	ph.Eof()
 }
 
-func getText(str string, indentLevel int) (text string, todo bool, done bool, repTask RepTask) {
+func getText(str string, indentLevel int, indentPattern string) (text string, todo bool, done bool, repTask RepTask) {
 	//fmt.Printf("indentLevel: %v str: '%s'\n", indentLevel, str )
 	if len(str) < (indentLevel*4 +2) {
 		return "", false, false, RepTask{false, 0, 0}
 	}
-	text = str[indentLevel*4 +2:]
+	str = strings.TrimLeft(str, strings.Repeat(indentPattern, indentLevel))
+	text = str[2:]
 	done = false
 	todo = false
 	repTask.Is = false
