@@ -40,11 +40,11 @@ func (ph *processHandler) Writeln(line string) {
 func (ph *processHandler) Eof()     {}
 func (ph *processHandler) NewFile() {}
 
-func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, todo bool, done bool, repTask process.RepTask) {
+func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, flags process.Flags) {
 	// TODO: handle [x] numXnum
-	if !done || repTask.Is {
-		if repTask.Is {
-			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(repTask.B) + lineStack[len(lineStack)-1])
+	if !flags.Done || flags.RepTask.Is {
+		if flags.RepTask.Is {
+			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(flags.RepTask.B) + lineStack[len(lineStack)-1])
 		} else {
 			ph.Writeln(line)
 		}

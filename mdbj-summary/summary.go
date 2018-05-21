@@ -36,40 +36,40 @@ func (ph *processHandler) Eof() {
 
 func (ph *processHandler) handleHeaderPrint() {
 	for i, header := range ph.headers {
-		if ! header.printed {
+		if !header.printed {
 			ph.Writeln("\t" + strings.Repeat("#", i+1) + " " + header.text)
 			ph.headers[i].printed = true
 		}
 	}
 }
 
-func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, todo bool, done bool, repTask process.RepTask) {
+func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, flags process.Flags) {
 	if strings.Trim(line, " \t\n\r") == "" {
 		return
 	}
 	if line[0] == '#' {
 		last := headerStack[len(headerStack)-1]
 		if len(headerStack) > len(ph.headers) {
-			ph.headers = append(ph.headers, header{ last, false })
+			ph.headers = append(ph.headers, header{last, false})
 		} else if len(headerStack) == len(ph.headers) {
 			ph.headers[len(ph.headers)-1] = header{last, false}
 		} else if len(headerStack) < len(ph.headers) {
-			ph.headers = ph.headers[: len(headerStack)]
+			ph.headers = ph.headers[:len(headerStack)]
 			ph.headers[len(ph.headers)-1] = header{last, false}
 		}
 	}
 
 	// inc count of todo items (rep tasks shouldnt count towards outstanding todo, unless done)
-	if todo && !repTask.Is {
+	if flags.Todo && !flags.RepTask.Is {
 		ph.totalCount += 1
 	}
 
-	if done {
+	if flags.Done {
 		ph.handleHeaderPrint()
 		ph.doneCount += 1
 		repStr := ""
-		if repTask.Is {
-			repStr = strconv.Itoa(repTask.A * repTask.B)
+		if flags.RepTask.Is {
+			repStr = strconv.Itoa(flags.RepTask.A * flags.RepTask.B)
 			// inc todo count here since we did a thing, its done, and we dont want a higher done count than total
 			ph.totalCount += 1
 		}

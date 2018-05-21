@@ -21,11 +21,14 @@ type RepTask struct {
 }
 
 type Flags struct {
+	Todo    bool
+	Done    bool
+	RepTask RepTask
 }
 
 type ProcessHandler interface {
 	Writeln(line string)
-	ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, todo bool, done bool, repTask RepTask)
+	ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, flags Flags)
 	Eof()
 	NewFile()
 }
@@ -102,50 +105,48 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 			}
 		}
 
-		todo := false
-		done := false
-		var repTask RepTask
+		var flags Flags
 		if indentLevel < len(lineStack)-1 {
 			lineStack = lineStack[:indentLevel+1]
 		}
 		if indentLevel == len(lineStack)-1 {
-			lineStack[len(lineStack)-1], todo, done, repTask = getText(line, indentLevel, indentPattern)
+			lineStack[len(lineStack)-1], flags = getText(line, indentLevel, indentPattern)
 		}
 		if indentLevel >= len(lineStack) {
 			row := ""
-			row, todo, done, repTask = getText(line, indentLevel, indentPattern)
+			row, flags = getText(line, indentLevel, indentPattern)
 			lineStack = append(lineStack, row)
 		}
 
-		ph.ProcessLine(line, indentLevel, headerStack, lineStack, todo, done, repTask)
+		ph.ProcessLine(line, indentLevel, headerStack, lineStack, flags)
 	}
 	ph.Eof()
 }
 
-func getText(str string, indentLevel int, indentPattern string) (text string, todo bool, done bool, repTask RepTask) {
+func getText(str string, indentLevel int, indentPattern string) (text string, flags Flags) {
 	//fmt.Printf("indentLevel: %v str: '%s'\n", indentLevel, str )
 	if len(str) < (indentLevel*4 + 2) {
-		return "", false, false, RepTask{false, 0, 0}
+		return "", Flags{false, false, RepTask{false, 0, 0}}
 	}
 	str = strings.TrimLeft(str, strings.Repeat(indentPattern, indentLevel))
 	text = str[2:]
-	done = false
-	todo = false
-	repTask.Is = false
+	flags.Done = false
+	flags.Todo = false
+	flags.RepTask.Is = false
 	if text[0] == '[' {
-		todo = true
+		flags.Todo = true
 		if text[1] == 'x' || text[1] == 'X' {
-			done = true
+			flags.Done = true
 		}
 		if len(text) > 4 {
 			text = text[4:]
 		}
 
 		if repTaskRegExp.MatchString(text) {
-			repTask.Is = true
+			flags.RepTask.Is = true
 			matches := repTaskRegExp.FindStringSubmatch(text)
-			repTask.A, _ = strconv.Atoi(matches[1])
-			repTask.B, _ = strconv.Atoi(matches[2])
+			flags.RepTask.A, _ = strconv.Atoi(matches[1])
+			flags.RepTask.B, _ = strconv.Atoi(matches[2])
 			loc := repTaskRegExp.FindIndex([]byte(text))
 			text = text[loc[1]:]
 		}
