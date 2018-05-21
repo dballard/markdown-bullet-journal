@@ -44,7 +44,7 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack 
 	// TODO: handle [x] numXnum
 	if !flags.Done || flags.RepTask.Is {
 		if flags.RepTask.Is {
-			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(flags.RepTask.B) + lineStack[len(lineStack)-1])
+			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(flags.RepTask.B) + " " + lineStack[len(lineStack)-1])
 		} else {
 			ph.Writeln(line)
 		}

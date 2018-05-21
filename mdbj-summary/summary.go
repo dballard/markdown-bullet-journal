@@ -69,7 +69,7 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack 
 		ph.doneCount += 1
 		repStr := ""
 		if flags.RepTask.Is {
-			repStr = strconv.Itoa(flags.RepTask.A * flags.RepTask.B)
+			repStr = strconv.Itoa(flags.RepTask.A * flags.RepTask.B) + " "
 			// inc todo count here since we did a thing, its done, and we dont want a higher done count than total
 			ph.totalCount += 1
 		}

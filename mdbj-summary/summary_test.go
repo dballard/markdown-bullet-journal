@@ -21,7 +21,8 @@ const EXPECTED = `
 		a partly done thing / the one done thing
 	# Repetition
 		25 things
-5 / 15
+		20 category / nested rep
+6 / 16
 `
 
 func TestSummary(t *testing.T) {

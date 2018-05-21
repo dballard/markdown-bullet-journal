@@ -148,7 +148,7 @@ func getText(str string, indentLevel int, indentPattern string) (text string, fl
 			flags.RepTask.A, _ = strconv.Atoi(matches[1])
 			flags.RepTask.B, _ = strconv.Atoi(matches[2])
 			loc := repTaskRegExp.FindIndex([]byte(text))
-			text = text[loc[1]:]
+			text = text[loc[1]+1:]
 		}
 	}
 	return
