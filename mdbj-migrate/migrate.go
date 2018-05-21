@@ -1,13 +1,13 @@
 package main
 
 import (
-	"os"
-	"time"
-	"log"
-	"github.com/dballard/markdown-bullet-journal/process"
 	"fmt"
+	"github.com/dballard/markdown-bullet-journal/process"
+	"log"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const template = `# Work
@@ -37,14 +37,14 @@ func (ph *processHandler) Writeln(line string) {
 }
 
 // NOP
-func (ph *processHandler) Eof() {}
+func (ph *processHandler) Eof()     {}
 func (ph *processHandler) NewFile() {}
 
-func (ph *processHandler) ProcessLine(line string, indentLevel int, stack []string, todo bool, done bool, repTask process.RepTask) {
+func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, todo bool, done bool, repTask process.RepTask) {
 	// TODO: handle [x] numXnum
 	if !done || repTask.Is {
 		if repTask.Is {
-			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(repTask.B) + stack[len(stack)-1] )
+			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(repTask.B) + lineStack[len(lineStack)-1])
 		} else {
 			ph.Writeln(line)
 		}
@@ -57,7 +57,7 @@ func main() {
 
 	fileName := time.Now().Format("2006-01-02") + ".md"
 
-	if _, err := os.Stat(fileName);	os.IsNotExist(err) {
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
 		ph.File, err = os.Create(fileName)
 		if err != nil {
 			log.Fatal("Cannot open: ", fileName, " > ", err)
@@ -73,7 +73,7 @@ func main() {
 		ph.File.WriteString(template)
 	} else {
 		lastFile := files[len(files)-1]
-		fmt.Println ("Migrating " + lastFile + " to " + fileName)
+		fmt.Println("Migrating " + lastFile + " to " + fileName)
 		process.ProcessFile(ph, lastFile)
 	}
 }

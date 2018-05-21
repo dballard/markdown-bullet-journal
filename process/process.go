@@ -1,23 +1,31 @@
 package process
 
 import (
-	"os"
-	"log"
 	"bufio"
-	"regexp"
 	"io/ioutil"
+	"log"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
+var (
+	repTaskRegExp = regexp.MustCompile("^([0-9]*)[xX]([0-9]*)")
+	headerExp     = regexp.MustCompile("^(#+) *(.+)")
+)
+
 type RepTask struct {
-	Is bool
+	Is   bool
 	A, B int
 }
 
-type ProcessHandler interface  {
+type Flags struct {
+}
+
+type ProcessHandler interface {
 	Writeln(line string)
-	ProcessLine(line string, indentLevel int, stack []string, todo bool, done bool, repTask RepTask)
+	ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, todo bool, done bool, repTask RepTask)
 	Eof()
 	NewFile()
 }
@@ -40,6 +48,14 @@ func GetFiles() (filteredFiles []string) {
 	return
 }
 
+func max(x, y int) int {
+	if x >= y {
+		return x
+	} else {
+		return y
+	}
+}
+
 func ProcessFile(ph ProcessHandler, fileName string) {
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -48,7 +64,9 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 	defer file.Close()
 	ph.NewFile()
 
-	stack := make([]string, 0)
+	headerStack := make([]string, 1)
+	lineStack := make([]string, 0)
+	//flags := Flags{}
 
 	scanner := bufio.NewScanner(file)
 	indentPattern := ""
@@ -71,29 +89,42 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 		} else {
 			indentLevel = strings.Count(startSpaces.FindString(line), indentPattern)
 		}
+
+		if headerExp.MatchString(line) {
+			matches := headerExp.FindStringSubmatch(line)
+			if len(matches[1]) > len(headerStack) {
+				headerStack = append(headerStack, matches[2])
+			} else if len(matches[1]) == len(headerStack) {
+				headerStack[len(headerStack)-1] = matches[2]
+			} else if len(matches[1]) < len(headerStack) {
+				headerStack = headerStack[:len(matches[1])]
+				headerStack[len(headerStack)-1] = matches[2]
+			}
+		}
+
 		todo := false
 		done := false
 		var repTask RepTask
-		if indentLevel < len(stack)-1 {
-			stack = stack[: indentLevel+1]
+		if indentLevel < len(lineStack)-1 {
+			lineStack = lineStack[:indentLevel+1]
 		}
-		if indentLevel == len(stack)-1 {
-			stack[len(stack)-1], todo, done, repTask = getText(line, indentLevel, indentPattern)
+		if indentLevel == len(lineStack)-1 {
+			lineStack[len(lineStack)-1], todo, done, repTask = getText(line, indentLevel, indentPattern)
 		}
-		if indentLevel >= len(stack) {
+		if indentLevel >= len(lineStack) {
 			row := ""
 			row, todo, done, repTask = getText(line, indentLevel, indentPattern)
-			stack = append(stack, row)
+			lineStack = append(lineStack, row)
 		}
 
-		ph.ProcessLine(line, indentLevel, stack, todo, done, repTask)
+		ph.ProcessLine(line, indentLevel, headerStack, lineStack, todo, done, repTask)
 	}
 	ph.Eof()
 }
 
 func getText(str string, indentLevel int, indentPattern string) (text string, todo bool, done bool, repTask RepTask) {
 	//fmt.Printf("indentLevel: %v str: '%s'\n", indentLevel, str )
-	if len(str) < (indentLevel*4 +2) {
+	if len(str) < (indentLevel*4 + 2) {
 		return "", false, false, RepTask{false, 0, 0}
 	}
 	str = strings.TrimLeft(str, strings.Repeat(indentPattern, indentLevel))
@@ -110,7 +141,6 @@ func getText(str string, indentLevel int, indentPattern string) (text string, to
 			text = text[4:]
 		}
 
-		repTaskRegExp := regexp.MustCompile("^([0-9]*)[xX]([0-9]*)")
 		if repTaskRegExp.MatchString(text) {
 			repTask.Is = true
 			matches := repTaskRegExp.FindStringSubmatch(text)

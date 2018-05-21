@@ -1,19 +1,23 @@
 package main
 
 import (
-	"runtime"
-	"os"
 	"github.com/dballard/markdown-bullet-journal/process"
 	"log"
+	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
 
+type header struct {
+	text    string
+	printed bool
+}
+
 type processHandler struct {
 	File                  *os.File
 	totalCount, doneCount int
-	header                string
-	headerPrinted         bool
+	headers               []header
 }
 
 func (ph *processHandler) Writeln(line string) {
@@ -23,23 +27,36 @@ func (ph *processHandler) Writeln(line string) {
 func (ph *processHandler) NewFile() {
 	ph.totalCount = 0
 	ph.doneCount = 0
-	ph.header = ""
-	ph.headerPrinted = false
-
+	ph.headers = []header{}
 }
 
 func (ph *processHandler) Eof() {
-	ph.Writeln(strconv.Itoa(ph.doneCount) +  " / " + strconv.Itoa(ph.totalCount))
+	ph.Writeln(strconv.Itoa(ph.doneCount) + " / " + strconv.Itoa(ph.totalCount))
 }
 
-func (ph *processHandler) ProcessLine(line string, indentLevel int, stack []string, todo bool, done bool, repTask process.RepTask) {
+func (ph *processHandler) handleHeaderPrint() {
+	for i, header := range ph.headers {
+		if ! header.printed {
+			ph.Writeln("\t" + strings.Repeat("#", i+1) + " " + header.text)
+			ph.headers[i].printed = true
+		}
+	}
+}
+
+func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, todo bool, done bool, repTask process.RepTask) {
 	if strings.Trim(line, " \t\n\r") == "" {
 		return
 	}
 	if line[0] == '#' {
-		ph.header = line[2:]
-		ph.headerPrinted = false;
-		return
+		last := headerStack[len(headerStack)-1]
+		if len(headerStack) > len(ph.headers) {
+			ph.headers = append(ph.headers, header{ last, false })
+		} else if len(headerStack) == len(ph.headers) {
+			ph.headers[len(ph.headers)-1] = header{last, false}
+		} else if len(headerStack) < len(ph.headers) {
+			ph.headers = ph.headers[: len(headerStack)]
+			ph.headers[len(ph.headers)-1] = header{last, false}
+		}
 	}
 
 	// inc count of todo items (rep tasks shouldnt count towards outstanding todo, unless done)
@@ -48,18 +65,15 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, stack []stri
 	}
 
 	if done {
-		if !ph.headerPrinted {
-			ph.Writeln("\t# " + ph.header)
-			ph.headerPrinted = true
-		}
+		ph.handleHeaderPrint()
 		ph.doneCount += 1
 		repStr := ""
 		if repTask.Is {
-			repStr = strconv.Itoa( repTask.A * repTask.B)
+			repStr = strconv.Itoa(repTask.A * repTask.B)
 			// inc todo count here since we did a thing, its done, and we dont want a higher done count than total
 			ph.totalCount += 1
 		}
-		ph.Writeln("\t\t" + repStr + strings.Join(stack, " / "))
+		ph.Writeln("\t\t" + repStr + strings.Join(lineStack, " / "))
 	}
 }
 

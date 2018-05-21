@@ -16,9 +16,12 @@ const EXPECTED = `
 	# Test Data
 		nesting1 / nesting 2 / nesting 3 / nesting 4 / nesting 5
 		not nested
+	# Nested Header
+	## With something done
+		a partly done thing / the one done thing
 	# Repetition
 		25 things
-4 / 11
+5 / 15
 `
 
 func TestSummary(t *testing.T) {
@@ -54,6 +57,6 @@ func TestSummary(t *testing.T) {
 		line := strings.Count(string(result[:diffLoc]), "\n")
 		errorStr := string(result[int(math.Max(0, float64(diffLoc - 10))) : int(math.Min(float64(len(result)), float64(diffLoc + 10))) ])
 
-		t.Errorf("Summary results do not match expected:\nfirst difference at line %v: '%v'\n%v<---->\n%v\n", line, errorStr, string(result), EXPECTED)
+		t.Errorf("Summary results do not match expected:\nfirst difference at line %v\nexpected char: '%c'\nactual char: '%v'\nline: '%v'\n%v<---->\n%v\n", line, EXPECTED[diffLoc], string(result[diffLoc]), errorStr, string(result), EXPECTED)
 	}
 }
