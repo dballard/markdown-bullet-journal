@@ -22,8 +22,7 @@ const EXPECTED = `# Work
 	- [ ] nesting 2
 		- [ ] nesting 3
 			- [ ] nesting 4
-    -
-    asdasd
+                - notes of note done thing
 - tabbing
 	- [ ] tabs migrated
 

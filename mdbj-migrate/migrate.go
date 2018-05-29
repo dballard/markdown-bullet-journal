@@ -30,6 +30,7 @@ const template = `# Work
 
 type processHandler struct {
 	File *os.File
+	flagStack []process.Flags
 }
 
 func (ph *processHandler) Writeln(line string) {
@@ -38,11 +39,30 @@ func (ph *processHandler) Writeln(line string) {
 
 // NOP
 func (ph *processHandler) Eof()     {}
-func (ph *processHandler) NewFile() {}
+func (ph *processHandler) NewFile() {
+	ph.flagStack = []process.Flags{}
+}
 
 func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, flags process.Flags) {
-	// TODO: handle [x] numXnum
-	if !flags.Done || flags.RepTask.Is {
+	if indentLevel+1 > len(ph.flagStack) {
+		ph.flagStack = append(ph.flagStack, flags)
+	} else {
+		ph.flagStack[indentLevel] = flags
+	}
+
+	print := true
+	if !flags.RepTask.Is { // always print repTasks
+		for i, iflags := range ph.flagStack {
+			if i > indentLevel {
+				break
+			}
+			if iflags.Done {
+				print = false
+			}
+		}
+	}
+
+	if print {
 		if flags.RepTask.Is {
 			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(flags.RepTask.B) + " " + lineStack[len(lineStack)-1])
 		} else if flags.Todo {

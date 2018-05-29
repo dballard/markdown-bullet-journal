@@ -2,9 +2,9 @@
 
 ![Markdown Bullet Journal Logo](https://github.com/dballard/markdown-bullet-journal/raw/master/Markdown-Bullet-Journal.png "Markdown Bullet Journal Logo")
 
-Markdown Bullet Journal is a digital adaptation of [analog tech](http://bulletjournal.com/). For my personal productivity I found having a full markdown todo list file with daily migrations was the most optimal was to manage my time. I added in a utility to summarize my past work as the daily migrations made that hard to track.
+Markdown Bullet Journal is a digital adaptation of [analog tech](http://bulletjournal.com/). When using analog pen + paper, bullet journal migrations are expensive in space and time, however in digital form they are cheap. I found that for my personal productivity having a full markdown todo list file with daily migrations was the most optimal way to manage my time and a digital bullet journal enabled this. I added in a utility to summarize my past work as the daily migrations intentionally removed it. I have also extended this tool to my tastes adding in custom support for repetitive daily tasks and pomodoros.
 
-These are a simple set of utilities that work for me. Nothing fancy
+These are a simple set of utilities that work for me. Nothing fancy.
 
 ## Usage
 
@@ -15,7 +15,7 @@ Download:
 - [mdbj-migreate.exe](https://www.danballard.com/resources/mdbj/mdbj-summary.exe)
 - [mdbj-summary.exe](https://www.danballard.com/resources/mdbj/mdbj-migrate.exe)
 
-And place them in a directory. Run `mdbj-migrate` to generate a template to work from and each day after to 'migrate'. Run `mdbj-summary` to generate summary.txt to review work done.
+And place them in a directory you want to use. Run `mdbj-migrate` to generate a template to work from in that directory and each day after to 'migrate' to create the new day's file in that directory. Run `mdbj-summary` to generate summary.txt in the same directory to review work done.
 
 ### Linux & Mac
 
@@ -26,7 +26,7 @@ go install github.com/dballard/markdown-bullet-journal/tree/master/mdbj-migrate
 go install github.com/dballard/markdown-bullet-journal/tree/master/mdbj-summary
 ```
 
-Pick a directory you want to use and run `mdbj-migreate` to generate a template to work from. Run it on successive days to 'migrate'. Run `mdbj-summary` to print a summary of done work to the console.
+Pick a directory you want to use and run `mdbj-migreate` to generate a template to work from in that directory. Run `mdbj-migrate` on succesive days and it will find the last dated file in the directory and 'migrate' it. Run `mdbj-summary` in the directory to print a summary of all done work to the console.
 
 ### Recommendations
 
@@ -36,7 +36,7 @@ My mdbj directoy is in a cloud backed up location so I can also slightly awkward
 
 ### mdbj-migrate
 
-When run in a directory, takes the last dated .md file, copies it to a new file with today's date, and dropes all lines marked completed (with a '[x]').
+When run in a directory, takes the last dated .md file, copies it to a new file with today's date, and drops all lines marked completed (with a '[x]').
 
 ### mdbj-summary
 
@@ -77,10 +77,53 @@ These are tasks you might want to do a subset of on any given day, and possibly 
 - [x] 1x5 - minutes of meditation
 ```
 
-Will get output as:
+under `summary` will show as
 
+```
 - 40 pushups
 - 5 minutes of meditation
+```
 
-And then on migration the '4' and '1' will get reset to 0 and the tasks will not get dropped
+And then on `migrate` the '4' and '1' will get reset to 0 and the tasks will not get dropped
+
+```
+- [ ] 0x10 - Pushups
+- [ ] 0x10 - Crunches
+- [ ] 0x10 - Lunges
+- [ ] 0x5 - minutes of meditation
+```
+
+#### Pomodoro ####
+
+If you want to track pomodoro sessions, simply add '.'s inside the square brackets of todo items. They will not be considered done until an 'x' is included and thus will migrate to clean items the next day. They will however count towards pomodoro summaries.
+
+```
+- [..] Big Task
+    - [x] Part A
+    - [x] Part B
+    - [x] Part C
+    - [ ] Part D
+- [ ] Other Task
+    - [..x] Thing 1
+    - [ ] Thing 2
+```
+
+will `migrate` to
+
+```
+- [ ] Big Task
+    - [ ] Part D
+- [ ] Other Task
+    - [ ] Thing 2
+```
+
+and `summary` will be
+
+```
+    Big Task / Part A
+    Big Task / Part B
+    Big Task / Part C
+    Other Task / Thing 1
+4 / 8 - 4 Pomodoros
+```
 
