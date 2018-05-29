@@ -74,6 +74,12 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack 
 }
 
 func main() {
+	if len(os.Args) > 1 {
+		fmt.Println(os.Args)
+		fmt.Println("Markdown Bullet Journal version: " + process.Version)
+		return
+	}
+
 	ph := new(processHandler)
 	files := process.GetFiles()
 

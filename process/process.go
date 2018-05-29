@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+const (
+	Version = "1.1"
+)
+
 var (
 	todoTaskExp = regexp.MustCompile("^\\[([ \\.xX]*)\\]")
 	startSpaces = regexp.MustCompile("^[\t ]*")

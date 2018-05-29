@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"fmt"
 )
 
 type header struct {
@@ -84,6 +85,11 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack 
 }
 
 func main() {
+	if len(os.Args) > 1 {
+		fmt.Println("Markdown Bullet Journal version: " + process.Version)
+		return
+	}
+
 	ph := new(processHandler)
 
 	if runtime.GOOS == "windows" {
