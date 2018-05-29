@@ -56,7 +56,7 @@ into
 
 The basics of headers with '#'
 
-Nested lists with '-' and indentation
+Nested lists with '-' for notes and indentation
 
 Todo and done with '[ ]' and '[x]'
 
