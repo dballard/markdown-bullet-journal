@@ -22,7 +22,9 @@ const EXPECTED = `
 	# Repetition
 		25 things
 		20 category / nested rep
-6 / 16
+	# Pomodoros
+		completed
+7 / 19 - 5 Pomodoros
 `
 
 func TestSummary(t *testing.T) {

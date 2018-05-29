@@ -11,6 +11,8 @@ import (
 )
 
 var (
+	todoTaskExp = regexp.MustCompile("^\\[([ \\.xX]*)\\]")
+	startSpaces = regexp.MustCompile("^[\t ]*")
 	repTaskRegExp = regexp.MustCompile("^([0-9]*)[xX]([0-9]*)")
 	headerExp     = regexp.MustCompile("^(#+) *(.+)")
 )
@@ -24,6 +26,7 @@ type Flags struct {
 	Todo    bool
 	Done    bool
 	RepTask RepTask
+	Pomodoros int
 }
 
 type ProcessHandler interface {
@@ -73,7 +76,6 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 
 	scanner := bufio.NewScanner(file)
 	indentPattern := ""
-	startSpaces := regexp.MustCompile("^[\t ]*")
 	indentLevel := 0
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -125,21 +127,26 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 
 func getText(str string, indentLevel int, indentPattern string) (text string, flags Flags) {
 	//fmt.Printf("indentLevel: %v str: '%s'\n", indentLevel, str )
-	if len(str) < (indentLevel*4 + 2) {
-		return "", Flags{false, false, RepTask{false, 0, 0}}
-	}
-	str = strings.TrimLeft(str, strings.Repeat(indentPattern, indentLevel))
-	text = str[2:]
 	flags.Done = false
 	flags.Todo = false
 	flags.RepTask.Is = false
-	if text[0] == '[' {
+	flags.Pomodoros = 0
+
+	if len(str) < (indentLevel*4 + 2) {
+		return "", flags
+	}
+	str = strings.TrimLeft(str, strings.Repeat(indentPattern, indentLevel))
+	text = str[2:]
+
+	if todoTaskExp.MatchString(text) {
 		flags.Todo = true
-		if text[1] == 'x' || text[1] == 'X' {
+		inner := string(todoTaskExp.FindSubmatch([]byte(text))[1])
+		if strings.ContainsAny(inner, "xX") {
 			flags.Done = true
 		}
-		if len(text) > 4 {
-			text = text[4:]
+		flags.Pomodoros = strings.Count(inner, ".")
+		if len(text) > len(inner) + 3 {
+			text = text[len(inner)+3:]
 		}
 
 		if repTaskRegExp.MatchString(text) {

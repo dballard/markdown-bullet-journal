@@ -12,16 +12,16 @@ import (
 const EXPECTED = `# Work
 
 - [ ] Write tests
-    - [ ] migrate
+	- [ ] migrate
 
 # Test Data
 
 - note
 -
 - [ ] nesting1
-    - [ ] nesting 2
-        - [ ] nesting 3
-            - [ ] nesting 4
+	- [ ] nesting 2
+		- [ ] nesting 3
+			- [ ] nesting 4
     -
     asdasd
 - tabbing
@@ -39,6 +39,11 @@ const EXPECTED = `# Work
 - [ ] Group
 	- [ ] 0x3 nesting rep
 	- [ ] 0x6 done nested rep
+
+# Pomodoros
+
+- [ ] not done
+- [ ] partly done
 `
 
 func TestMigrate(t *testing.T) {

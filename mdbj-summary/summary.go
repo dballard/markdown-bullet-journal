@@ -15,9 +15,9 @@ type header struct {
 }
 
 type processHandler struct {
-	File                  *os.File
-	totalCount, doneCount int
-	headers               []header
+	File                                 *os.File
+	totalCount, doneCount, pomodoroCount int
+	headers                              []header
 }
 
 func (ph *processHandler) Writeln(line string) {
@@ -27,11 +27,16 @@ func (ph *processHandler) Writeln(line string) {
 func (ph *processHandler) NewFile() {
 	ph.totalCount = 0
 	ph.doneCount = 0
+	ph.pomodoroCount = 0
 	ph.headers = []header{}
 }
 
 func (ph *processHandler) Eof() {
-	ph.Writeln(strconv.Itoa(ph.doneCount) + " / " + strconv.Itoa(ph.totalCount))
+	pomodoroStr := ""
+	if ph.pomodoroCount > 0 {
+		pomodoroStr = " - " + strconv.Itoa(ph.pomodoroCount) + " Pomodoros"
+	}
+	ph.Writeln(strconv.Itoa(ph.doneCount) + " / " + strconv.Itoa(ph.totalCount) + pomodoroStr)
 }
 
 func (ph *processHandler) handleHeaderPrint() {
@@ -69,12 +74,13 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack 
 		ph.doneCount += 1
 		repStr := ""
 		if flags.RepTask.Is {
-			repStr = strconv.Itoa(flags.RepTask.A * flags.RepTask.B) + " "
+			repStr = strconv.Itoa(flags.RepTask.A*flags.RepTask.B) + " "
 			// inc todo count here since we did a thing, its done, and we dont want a higher done count than total
 			ph.totalCount += 1
 		}
 		ph.Writeln("\t\t" + repStr + strings.Join(lineStack, " / "))
 	}
+	ph.pomodoroCount += flags.Pomodoros
 }
 
 func main() {
