@@ -12,19 +12,20 @@ import (
 const EXPECTED = `# Work
 
 - [ ] Write tests
-	- [ ] migrate
+    - [ ] migrate
 
 # Test Data
 
 - note
 -
 - [ ] nesting1
-	- [ ] nesting 2
-		- [ ] nesting 3
-			- [ ] nesting 4
+    - [ ] nesting 2
+        - [ ] nesting 3
+            - [ ] nesting 4
                 - notes of note done thing
 - tabbing
-	- [ ] tabs migrated
+    - [ ] tabs migrated
+    - notes
 
 # Nothing done
 
@@ -36,8 +37,8 @@ const EXPECTED = `# Work
 - [ ] 0x5 things
 - [ ] 0x2 other things
 - [ ] Group
-	- [ ] 0x3 nesting rep
-	- [ ] 0x6 done nested rep
+    - [ ] 0x3 nesting rep
+    - [ ] 0x6 done nested rep
 
 # Pomodoros
 
@@ -75,7 +76,6 @@ func TestMigrate(t *testing.T) {
 		line := strings.Count(string(result[:diffLoc]), "\n")
 		errorStr := string(result[int(math.Max(0, float64(diffLoc - 10))) : int(math.Min(float64(len(result)), float64(diffLoc + 10))) ])
 
-		t.Errorf("Summary results do not match expected:\nfirst difference at line %v: '%v'\n%v<---->\n%v\n", line, errorStr, string(result), EXPECTED)
-
+		t.Errorf("Summary results do not match expected:\nfirst difference at line %v\nexpected char: '%c'\nactual char: '%v'\nline: '%v'\nACTUAL:\n%v<---->\nEXPECTED:\n%v\n", line, EXPECTED[diffLoc], string(result[diffLoc]), errorStr, string(result), EXPECTED)
 	}
 }

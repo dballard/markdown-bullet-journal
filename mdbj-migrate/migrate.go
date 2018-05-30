@@ -43,7 +43,7 @@ func (ph *processHandler) NewFile() {
 	ph.flagStack = []process.Flags{}
 }
 
-func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, flags process.Flags) {
+func (ph *processHandler) ProcessLine(line string, indentLevel int, indentString string, headerStack []string, lineStack []string, flags process.Flags) {
 	if indentLevel+1 > len(ph.flagStack) {
 		ph.flagStack = append(ph.flagStack, flags)
 	} else {
@@ -56,7 +56,7 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack 
 			if i > indentLevel {
 				break
 			}
-			if iflags.Done {
+			if iflags.Done || iflags.Dropped {
 				print = false
 			}
 		}
@@ -64,9 +64,9 @@ func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack 
 
 	if print {
 		if flags.RepTask.Is {
-			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] 0x" + strconv.Itoa(flags.RepTask.B) + " " + lineStack[len(lineStack)-1])
+			ph.Writeln(strings.Repeat(indentString, indentLevel) + "- [ ] 0x" + strconv.Itoa(flags.RepTask.B) + " " + lineStack[len(lineStack)-1])
 		} else if flags.Todo {
-			ph.Writeln(strings.Repeat("\t", indentLevel) + "- [ ] " + lineStack[len(lineStack)-1])
+			ph.Writeln(strings.Repeat(indentString, indentLevel) + "- [ ] " + lineStack[len(lineStack)-1])
 		} else {
 			ph.Writeln(line)
 		}

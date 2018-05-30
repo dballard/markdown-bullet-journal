@@ -49,7 +49,7 @@ func (ph *processHandler) handleHeaderPrint() {
 	}
 }
 
-func (ph *processHandler) ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, flags process.Flags) {
+func (ph *processHandler) ProcessLine(line string, indentLevel int, indentString string, headerStack []string, lineStack []string, flags process.Flags) {
 	if strings.Trim(line, " \t\n\r") == "" {
 		return
 	}

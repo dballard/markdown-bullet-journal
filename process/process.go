@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	todoTaskExp = regexp.MustCompile("^\\[([ \\.xX]*)\\]")
+	todoTaskExp = regexp.MustCompile("^\\[([ \\.xX-]*)\\]")
 	startSpaces = regexp.MustCompile("^[\t ]*")
 	repTaskRegExp = regexp.MustCompile("^([0-9]*)[xX]([0-9]*)")
 	headerExp     = regexp.MustCompile("^(#+) *(.+)")
@@ -29,13 +29,14 @@ type RepTask struct {
 type Flags struct {
 	Todo    bool
 	Done    bool
+	Dropped bool
 	RepTask RepTask
 	Pomodoros int
 }
 
 type ProcessHandler interface {
 	Writeln(line string)
-	ProcessLine(line string, indentLevel int, headerStack []string, lineStack []string, flags Flags)
+	ProcessLine(line string, indentLevel int, indentString string, headerStack []string, lineStack []string, flags Flags)
 	Eof()
 	NewFile()
 }
@@ -124,7 +125,7 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 			lineStack = append(lineStack, row)
 		}
 
-		ph.ProcessLine(line, indentLevel, headerStack, lineStack, flags)
+		ph.ProcessLine(line, indentLevel, indentPattern, headerStack, lineStack, flags)
 	}
 	ph.Eof()
 }
@@ -132,6 +133,7 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 func getText(str string, indentLevel int, indentPattern string) (text string, flags Flags) {
 	//fmt.Printf("indentLevel: %v str: '%s'\n", indentLevel, str )
 	flags.Done = false
+	flags.Dropped = false
 	flags.Todo = false
 	flags.RepTask.Is = false
 	flags.Pomodoros = 0
@@ -147,6 +149,9 @@ func getText(str string, indentLevel int, indentPattern string) (text string, fl
 		inner := string(todoTaskExp.FindSubmatch([]byte(text))[1])
 		if strings.ContainsAny(inner, "xX") {
 			flags.Done = true
+		}
+		if strings.Contains(inner, "-") {
+			flags.Dropped = true
 		}
 		flags.Pomodoros = strings.Count(inner, ".")
 		if len(text) > len(inner) + 3 {

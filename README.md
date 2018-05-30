@@ -58,7 +58,7 @@ The basics of headers with '#'
 
 Nested lists with '-' for notes and indentation
 
-Todo and done with '[ ]' and '[x]'
+Todo and done with '[ ]' for open todo item, '[x]' for done todo item, and '[-]' for dropped todo item
 
 Obviously you can use other markdown features such as **bold**, *italics* and [Links](https://guides.github.com/features/mastering-markdown/) but none of these trigger any special treatment with regards to Markdown Bullet Journal.
 

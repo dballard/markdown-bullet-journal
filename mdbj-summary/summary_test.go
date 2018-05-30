@@ -60,6 +60,6 @@ func TestSummary(t *testing.T) {
 		line := strings.Count(string(result[:diffLoc]), "\n")
 		errorStr := string(result[int(math.Max(0, float64(diffLoc - 10))) : int(math.Min(float64(len(result)), float64(diffLoc + 10))) ])
 
-		t.Errorf("Summary results do not match expected:\nfirst difference at line %v\nexpected char: '%c'\nactual char: '%v'\nline: '%v'\n%v<---->\n%v\n", line, EXPECTED[diffLoc], string(result[diffLoc]), errorStr, string(result), EXPECTED)
+		t.Errorf("Summary results do not match expected:\nfirst difference at line %v\nexpected char: '%c'\nactual char: '%v'\nline: '%v'\nACTUAL:\n%v<---->\nEXPECTED:\n%v\n", line, EXPECTED[diffLoc], string(result[diffLoc]), errorStr, string(result), EXPECTED)
 	}
 }
