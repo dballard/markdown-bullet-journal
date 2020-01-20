@@ -77,7 +77,6 @@ func ProcessFile(ph ProcessHandler, fileName string) {
 
 	headerStack := make([]string, 1)
 	lineStack := make([]string, 0)
-	//flags := Flags{}
 
 	scanner := bufio.NewScanner(file)
 	indentPattern := ""

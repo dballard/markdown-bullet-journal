@@ -28,7 +28,7 @@ const EXPECTED = `
 `
 
 func TestSummary(t *testing.T) {
-	ph := new(processHandler)
+	ph := new(summary)
 	r, w, err := os.Pipe()
 	if err != nil {
 		t.Fatal(err)

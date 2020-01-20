@@ -47,7 +47,7 @@ const EXPECTED = `# Work
 `
 
 func TestMigrate(t *testing.T) {
-	ph := new(processHandler)
+	ph := new(seriesMiragate)
 	r, w, err := os.Pipe()
 	if err != nil {
 		t.Fatal(err)
