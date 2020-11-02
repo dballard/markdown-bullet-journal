@@ -12,8 +12,8 @@ These are a simple set of utilities that work for me. Nothing fancy.
 
 Download:
 
-- [mdbj-migreate.exe](https://www.danballard.com/resources/mdbj/mdbj-summary.exe)
-- [mdbj-summary.exe](https://www.danballard.com/resources/mdbj/mdbj-migrate.exe)
+- [mdbj-migrate.exe](https://www.danballard.com/resources/mdbj/mdbj-migrate.exe)
+- [mdbj-summary.exe](https://www.danballard.com/resources/mdbj/mdbj-summary.exe)
 
 And place them in a directory you want to use. Run `mdbj-migrate` to generate a template to work from in that directory and each day after to 'migrate' to create the new day's file in that directory. Run `mdbj-summary` to generate summary.txt in the same directory to review work done.
 
@@ -26,7 +26,7 @@ go install github.com/dballard/markdown-bullet-journal/tree/master/mdbj-migrate
 go install github.com/dballard/markdown-bullet-journal/tree/master/mdbj-summary
 ```
 
-Pick a directory you want to use and run `mdbj-migreate` to generate a template to work from in that directory. Run `mdbj-migrate` on succesive days and it will find the last dated file in the directory and 'migrate' it. Run `mdbj-summary` in the directory to print a summary of all done work to the console.
+Pick a directory you want to use and run `mdbj-migrate` to generate a template to work from in that directory. Run `mdbj-migrate` on succesive days and it will find the last dated file in the directory and 'migrate' it. Run `mdbj-summary` in the directory to print a summary of all done work to the console.
 
 ### Recommendations
 
